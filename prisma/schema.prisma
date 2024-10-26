@@ -37,6 +37,7 @@ model Session {
   user         User     @relation(fields: [userId], references: [id], onDelete: Cascade, name: "SessionToUser")
 }
 
+// This model stores user information like name, email (unique), role (user or admin by default), and relations to accounts, sessions, and profile.
 model User {
   id            String        @id @default(cuid())
   name          String?
@@ -51,8 +52,11 @@ model User {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   profile       Profile?
+
+  Reservation Reservation[]
 }
 
+//  This model stores additional user details like first name, last name, bio, and image. It has a one-to-one relationship with the User model.
 model Profile {
   id        String  @id @default(cuid())
   firstName String
@@ -63,6 +67,7 @@ model Profile {
   userId    String  @unique
 }
 
+// This model represents patrons of the library, storing details like document ID, name, email, phone, address, and relations to orders.
 model Customer {
   id        String   @id @default(cuid())
   document  String
@@ -75,41 +80,44 @@ model Customer {
   orders    Order[]
 }
 
+// This model represents a borrowing request, holding information like customer, status, creation/update times, and relations to order items.
 model Order {
   id         String      @id @default(cuid())
   customer   Customer    @relation(fields: [customerId], references: [id])
   customerId String
-  total      Float
   status     String
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   items      OrderItem[]
+  Fine       Fine[]
 }
 
+// This model represents a specific item borrowed within an order, containing details like order, product, quantity, creation/update times.
 model OrderItem {
-  id         String   @id @default(cuid())
-  order      Order    @relation(fields: [orderId], references: [id])
-  orderId    String
-  product    Products @relation(fields: [productId], references: [id])
-  productId  String
-  quantity   Int
-  price      Float
-  totalprice Float
-  discount   Float
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
+  id           String  @id @default(cuid())
+  order        Order    @relation(fields: [orderId], references: [id])
+  orderId      String
+  book         Book     @relation(fields: [bookId], references: [id])
+  bookId       String
+  quantity     Int
+  product      Products @relation(fields: [productId], references: [id]) // This is the missing link
+  productId    String
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt   
+
 }
 
+//  This model represents the library's collection, storing information like product name, description, image, stock availability, creation/update times, and relations to order items.
 model Products {
-  id          String      @id @default(cuid())
-  name        String
-  description String
-  price       Float
-  image       String
-  stock       Int
-  createdAt   DateTime    @default(now())
-  updatedAt   DateTime    @updatedAt
-  orderItems  OrderItem[]
+  id           String  @id @default(cuid())
+  name         String
+  description  String
+  image        String
+  stock        Int
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  orderItems   OrderItem[]
+  Reservation  Reservation[]
 }
 
 model VerificationToken {
@@ -123,4 +131,52 @@ model VerificationToken {
 enum Enum_RoleName {
   USER
   ADMIN
+}
+
+// This model could be a subclass of Products specifically for books, potentially including additional attributes like author, genre, ISBN, and publication date.
+model Book {
+  id           String  @id @default(cuid())
+  title        String
+  author       String
+  isbn         String?
+  genre        String
+  publicationDate DateTime?
+  category     Category @relation(fields: [categoryId], references: [id])
+  categoryId   String
+  copies       Int      @default(1)
+  orderItems OrderItem[]
+}
+
+// This model could categorize products (books) by genre, fiction/non-fiction etc. Products can then have a many-to-many relationship with categories.
+model Category {
+  id    String @id @default(cuid())
+  name  String @unique
+  books Book[]
+}
+
+// This model could define borrowing durations based on user type (e.g., students might have shorter loan periods than staff). Orders can then reference the loan period to determine due dates.
+model LoanPeriod {
+  id        String   @id @default(cuid())
+  name      String
+  duration  Int // In days
+  userRoles String[] // Roles allowed for this loan period
+}
+
+// This model could track overdue charges associated with orders.
+model Fine {
+  id      String @id @default(cuid())
+  amount  Float
+  reason  String
+  order   Order  @relation(fields: [orderId], references: [id])
+  orderId String
+}
+
+// This model could allow users to reserve items in advance, potentially with a waiting list functionality.
+model Reservation {
+  id        String   @id @default(cuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  product   Products @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime @default(now())
 }

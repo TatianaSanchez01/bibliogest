@@ -16,11 +16,11 @@ import {
   FormMessage,
 } from '@/src/components/ui/form';
 import { Input } from '@/src/components/ui/input';
-import { nanoid } from 'nanoid';
+import ReactLoading from 'react-loading';
 
-const formSchema = z.object({
-  username: z.string(),
-  email: z.string(),
+const FormSchema = z.object({
+  name: z.string(),
+  email: z.string().email(),
 });
 
 export async function getServerSideProps(context: { params: { id: string } }) {
@@ -36,7 +36,7 @@ const Index = ({ id }: { id: string }) => {
     email: '',
   });
 
-  const [getUser] = useLazyQuery(GET_USER_BY_ID, {
+  const [getUser, { loading: querieLoading }] = useLazyQuery(GET_USER_BY_ID, {
     fetchPolicy: 'network-only',
     onCompleted(data) {
       setUserData(data.user);
@@ -44,22 +44,23 @@ const Index = ({ id }: { id: string }) => {
   });
 
   const [userCreateMutation] = useMutation(CREATE_USER);
-  const [userUpdateMutation] = useMutation(UPDATE_USER);
+  const [userUpdateMutation, { loading: mutationLoading }] =
+    useMutation(UPDATE_USER);
 
-  const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<z.infer<typeof FormSchema>>({
+    resolver: zodResolver(FormSchema),
     defaultValues: {
-      username: userData?.name,
+      name: userData?.name,
       email: userData?.email,
     },
   });
 
-  async function onSubmit(values: z.infer<typeof formSchema>) {
+  async function onSubmit(values: z.infer<typeof FormSchema>) {
     if (id === 'new') {
       const passsword = nanoid();
       try {
         const usuario = await createUser({
-          name: values.username,
+          name: values.name,
           email: values.email,
           password: passsword,
         }).then(async (res) => {
@@ -82,18 +83,16 @@ const Index = ({ id }: { id: string }) => {
             },
           });
         });
-        console.log(usuario);
       } catch (e) {
-        console.log(e);
+        console.error(e);
       }
     } else {
-      console.log(values)
       await userUpdateMutation({
         variables: {
           where: { id: id },
           data: {
             name: {
-              set: values.username,
+              set: values.name,
             },
             email: {
               set: values.email,
@@ -105,18 +104,38 @@ const Index = ({ id }: { id: string }) => {
   }
 
   useEffect(() => {
-    getUser({ variables: { userId: id } });
+    if (id !== 'new') {
+      getUser({ variables: { userId: id } });
+    }
   }, [id]);
+
+  useEffect(() => {
+    if (userData) {
+      form.reset(userData);
+    }
+  }, [userData, form]);
+
+  if (querieLoading || mutationLoading)
+    return (
+      <div className='flex items-center justify-center'>
+        <ReactLoading
+          type='bubbles'
+          color='#f9802d'
+          height={'20%'}
+          width={'20%'}
+        />
+      </div>
+    );
 
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className='space-y-8'>
         <FormField
           control={form.control}
-          name='username'
+          name='name'
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel>Name</FormLabel>
               <FormControl>
                 <Input
                   placeholder='username'

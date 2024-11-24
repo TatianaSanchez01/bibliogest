@@ -106,7 +106,6 @@ const Index = ({ id }: { id: string }) => {
       update: formData,
     };
 
-    console.log(data);
 
     await upsertBook({
       variables: {

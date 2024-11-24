@@ -97,7 +97,6 @@ model OrderItem {
   id        String   @id @default(cuid())
   order     Order    @relation(fields: [orderId], references: [id])
   orderId   String
-  book      Book     @relation(fields: [bookId], references: [id])
   bookId    String
   quantity  Int
   product   Products @relation(fields: [productId], references: [id])
@@ -139,19 +138,12 @@ model Book {
   author          String
   isbn            String?
   publicationDate DateTime?
-  genre           Genre       @relation(fields: [genreId], references: [id])
-  genreId         String
+  genre           String
   copies          Int         @default(1)
-  orderItems      OrderItem[]
   image           String
 }
 
-// This model could categorize products (books) by genre, fiction/non-fiction etc. Products can then have a many-to-many relationship with categories.
-model Genre {
-  id    String @id @default(cuid())
-  name  String @unique
-  books Book[]
-}
+
 
 // This model could define borrowing durations based on user type (e.g., students might have shorter loan periods than staff). Orders can then reference the loan period to determine due dates.
 model LoanPeriod {

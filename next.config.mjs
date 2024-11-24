@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: ['www.planetadelibros.com.co', 'lh3.googleusercontent.com']
+    domains: ['www.planetadelibros.com.co', 'lh3.googleusercontent.com', 'www.penguinlibros.com']
   }
 };
 

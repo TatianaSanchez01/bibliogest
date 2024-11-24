@@ -1,3 +1,5 @@
+import { cookies } from 'next/headers';
+
 const makePost = (url: string, body: string, options: object) => {
   const headers = options.headers || {};
   return fetch(url, {
@@ -21,19 +23,27 @@ const makeJSONPost = (url: string, data: any, options: { headers: {} }) => {
 };
 
 export const getAuth0Token = async () => {
-  const url = `https://appbasemj.us.auth0.com/oauth/token`;
-  const headers = { 'content-type': 'application/json' };
-  const body = {
-    client_id: 'V0eG3Tb8wiDXpD9MQtwwncnrXesiSzaj',
-    client_secret: 'ioPd3tXU00-qnxTCmm4nRrZ9XZhKLLYbT0Gv1YokQBjKUlQTF7yBfWk9kSQf6sCo',
-    audience: 'https://appbasemj.us.auth0.com/api/v2/',
-    grant_type: 'client_credentials',
+  const url = `https://dev-3rdz760m2026mipo.us.auth0.com/oauth/token`;
+
+  const options = {
+    method: 'POST',
+    headers: {
+      cookie: '',
+      'Content-Type': 'application/json',
+    },
+    body: '{"client_id": "IWk1RCO8mCgO0I4E96CJt3b9Tx5uT0QD","client_secret":"EDR9FB0w2HdBd436Yzu-I4eqmxRdRTySTnPYwgKfAdX-l2gEnibHskND3_uDFpM-","audience":"https://dev-3rdz760m2026mipo.us.auth0.com/api/v2/",      "grant_type":"client_credentials"}',
   };
-  return makeJSONPost(url, body, { headers });
+
+  const res = fetch(url, options).then((response) => response.json());
+  return res;
 };
 
-export const createAuth0User = async (data: any, token: any, tokenType: any) => {
-  const url = `https://appbasemj.us.auth0.com/api/v2/users`;
+export const createAuth0User = async (
+  data: any,
+  token: any,
+  tokenType: any
+) => {
+  const url = `https://dev-3rdz760m2026mipo.us.auth0.com/api/v2/users`;
   const headers = {
     Authorization: `${tokenType} ${token}`,
   };

@@ -59,7 +59,7 @@ const Index = ({ id }: { id: string }) => {
     if (id === 'new') {
       const passsword = nanoid();
       try {
-        const usuario = await createUser({
+        await createUser({
           name: values.name,
           email: values.email,
           password: passsword,
@@ -178,3 +178,7 @@ const Index = ({ id }: { id: string }) => {
 };
 
 export default Index;
+function nanoid() {
+  throw new Error('Function not implemented.');
+}
+

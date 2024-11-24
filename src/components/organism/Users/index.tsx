@@ -20,6 +20,7 @@ import { Button } from '@/src/components/ui/button';
 import { GET_USERS } from '@/src/utils/gql/queries/users';
 import { useQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
+import { UserRoundPlus } from 'lucide-react';
 
 export default function Component() {
   const [users, setUsers] = React.useState([]);
@@ -40,10 +41,11 @@ export default function Component() {
         </div>
         <Button
           onClick={() => router.push('/users/new')}
-          className='px-10'
+          className='px-7 flex gap-4'
           variant='default'
         >
-          Nuevo
+          Add user
+          <UserRoundPlus />
         </Button>
       </CardHeader>
       <CardContent>

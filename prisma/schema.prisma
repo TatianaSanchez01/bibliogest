@@ -94,30 +94,29 @@ model Order {
 
 // This model represents a specific item borrowed within an order, containing details like order, product, quantity, creation/update times.
 model OrderItem {
-  id           String  @id @default(cuid())
-  order        Order    @relation(fields: [orderId], references: [id])
-  orderId      String
-  book         Book     @relation(fields: [bookId], references: [id])
-  bookId       String
-  quantity     Int
-  product      Products @relation(fields: [productId], references: [id]) // This is the missing link
-  productId    String
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt   
-
+  id        String   @id @default(cuid())
+  order     Order    @relation(fields: [orderId], references: [id])
+  orderId   String
+  book      Book     @relation(fields: [bookId], references: [id])
+  bookId    String
+  quantity  Int
+  product   Products @relation(fields: [productId], references: [id])
+  productId String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 //  This model represents the library's collection, storing information like product name, description, image, stock availability, creation/update times, and relations to order items.
 model Products {
-  id           String  @id @default(cuid())
-  name         String
-  description  String
-  image        String
-  stock        Int
-  createdAt    DateTime @default(now())
-  updatedAt    DateTime @updatedAt
-  orderItems   OrderItem[]
-  Reservation  Reservation[]
+  id          String        @id @default(cuid())
+  name        String
+  description String
+  image       String
+  stock       Int
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  orderItems  OrderItem[]
+  Reservation Reservation[]
 }
 
 model VerificationToken {
@@ -135,20 +134,20 @@ enum Enum_RoleName {
 
 // This model could be a subclass of Products specifically for books, potentially including additional attributes like author, genre, ISBN, and publication date.
 model Book {
-  id           String  @id @default(cuid())
-  title        String
-  author       String
-  isbn         String?
-  genre        String
+  id              String      @id @default(cuid())
+  title           String
+  author          String
+  isbn            String?
   publicationDate DateTime?
-  category     Category @relation(fields: [categoryId], references: [id])
-  categoryId   String
-  copies       Int      @default(1)
-  orderItems OrderItem[]
+  genre           Genre       @relation(fields: [genreId], references: [id])
+  genreId         String
+  copies          Int         @default(1)
+  orderItems      OrderItem[]
+  image           String
 }
 
 // This model could categorize products (books) by genre, fiction/non-fiction etc. Products can then have a many-to-many relationship with categories.
-model Category {
+model Genre {
   id    String @id @default(cuid())
   name  String @unique
   books Book[]

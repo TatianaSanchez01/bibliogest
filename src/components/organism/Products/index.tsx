@@ -21,7 +21,7 @@ import { useQuery } from '@apollo/client';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Avatar, AvatarImage } from '../../ui/avatar';
-import { DiamondPlus } from 'lucide-react';
+import { BookPlus } from 'lucide-react';
 
 export default function Component() {
   const [books, setBooks] = useState([]);
@@ -48,7 +48,7 @@ export default function Component() {
           variant='default'
         >
           New
-          <DiamondPlus />
+          <BookPlus />
         </Button>
       </CardHeader>
       <CardContent>

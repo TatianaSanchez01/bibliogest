@@ -52,8 +52,6 @@ model User {
   createdAt     DateTime      @default(now())
   updatedAt     DateTime      @updatedAt
   profile       Profile?
-
-  Reservation Reservation[]
 }
 
 //  This model stores additional user details like first name, last name, bio, and image. It has a one-to-one relationship with the User model.
@@ -89,7 +87,6 @@ model Order {
   createdAt  DateTime    @default(now())
   updatedAt  DateTime    @updatedAt
   items      OrderItem[]
-  Fine       Fine[]
 }
 
 // This model represents a specific item borrowed within an order, containing details like order, product, quantity, creation/update times.
@@ -99,23 +96,9 @@ model OrderItem {
   orderId   String
   bookId    String
   quantity  Int
-  product   Products @relation(fields: [productId], references: [id])
-  productId String
+  book      Book @relation(fields: [bookId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-}
-
-//  This model represents the library's collection, storing information like product name, description, image, stock availability, creation/update times, and relations to order items.
-model Products {
-  id          String        @id @default(cuid())
-  name        String
-  description String
-  image       String
-  stock       Int
-  createdAt   DateTime      @default(now())
-  updatedAt   DateTime      @updatedAt
-  orderItems  OrderItem[]
-  Reservation Reservation[]
 }
 
 model VerificationToken {
@@ -141,33 +124,6 @@ model Book {
   genre           String
   copies          Int         @default(1)
   image           String
+  orderItems  OrderItem[]
 }
 
-
-
-// This model could define borrowing durations based on user type (e.g., students might have shorter loan periods than staff). Orders can then reference the loan period to determine due dates.
-model LoanPeriod {
-  id        String   @id @default(cuid())
-  name      String
-  duration  Int // In days
-  userRoles String[] // Roles allowed for this loan period
-}
-
-// This model could track overdue charges associated with orders.
-model Fine {
-  id      String @id @default(cuid())
-  amount  Float
-  reason  String
-  order   Order  @relation(fields: [orderId], references: [id])
-  orderId String
-}
-
-// This model could allow users to reserve items in advance, potentially with a waiting list functionality.
-model Reservation {
-  id        String   @id @default(cuid())
-  user      User     @relation(fields: [userId], references: [id])
-  userId    String
-  product   Products @relation(fields: [productId], references: [id])
-  productId String
-  createdAt DateTime @default(now())
-}

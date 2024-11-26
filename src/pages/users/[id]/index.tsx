@@ -17,10 +17,19 @@ import {
 } from '@/src/components/ui/form';
 import { Input } from '@/src/components/ui/input';
 import ReactLoading from 'react-loading';
+import {
+  Select,
+  SelectContent,
+  SelectGroup,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/src/components/ui/select';
 
 const FormSchema = z.object({
   name: z.string(),
   email: z.string().email(),
+  role: z.string(),
 });
 
 export async function getServerSideProps(context: { params: { id: string } }) {
@@ -34,6 +43,7 @@ const Index = ({ id }: { id: string }) => {
   const [userData, setUserData] = useState({
     name: '',
     email: '',
+    role: '',
   });
 
   const [getUser, { loading: querieLoading }] = useLazyQuery(GET_USER_BY_ID, {
@@ -52,6 +62,7 @@ const Index = ({ id }: { id: string }) => {
     defaultValues: {
       name: userData?.name,
       email: userData?.email,
+      role: userData?.role,
     },
   });
 
@@ -62,6 +73,7 @@ const Index = ({ id }: { id: string }) => {
         await createUser({
           name: values.name,
           email: values.email,
+          role: values.role,
           password: passsword,
         }).then(async (res) => {
           const user = res.usuario;
@@ -76,7 +88,7 @@ const Index = ({ id }: { id: string }) => {
                   },
                 },
                 name: user.name,
-                role: 'USER',
+                role: user.role,
                 email: user.email,
                 image: user.picture,
               },
@@ -96,6 +108,9 @@ const Index = ({ id }: { id: string }) => {
             },
             email: {
               set: values.email,
+            },
+            role: {
+              set: values.role,
             },
           },
         },
@@ -171,6 +186,33 @@ const Index = ({ id }: { id: string }) => {
             </FormItem>
           )}
         />
+
+        <FormField
+          control={form.control}
+          name='role'
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel>Email</FormLabel>
+              <FormControl>
+                <Select
+                  onValueChange={field.onChange}
+                  defaultValue={field.value}
+                >
+                  <SelectTrigger className='w-[180px]'>
+                    <SelectValue placeholder='Select a role' />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectGroup>
+                      <SelectItem value='USER'>User</SelectItem>
+                      <SelectItem value='ADMIN'>Admin</SelectItem>
+                    </SelectGroup>
+                  </SelectContent>
+                </Select>
+              </FormControl>
+              <FormMessage />
+            </FormItem>
+          )}
+        />
         <Button type='submit'>Submit</Button>
       </form>
     </Form>
@@ -181,4 +223,3 @@ export default Index;
 function nanoid() {
   throw new Error('Function not implemented.');
 }
-

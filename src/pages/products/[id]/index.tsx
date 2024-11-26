@@ -34,7 +34,7 @@ const FormSchema = z.object({
   title: z.string(),
   author: z.string(),
   isbn: z.string(),
-  publicationDate: z.string(),
+  publicationDate: z.string().date(),
   copies: z.number(),
   image: z.string(),
   genre: z.string(),
@@ -54,16 +54,22 @@ const Index = ({ id }: { id: string }) => {
     title: '',
     author: '',
     isbn: '',
-    publicationDate: '',
+    publicationDate: new Date(),
     copies: 0,
     genre: '',
     image: '',
   });
+  const [date, setDate] = useState<Date | undefined>(new Date('01/01/2024'));
 
   const [getBook, { loading: querieLoading }] = useLazyQuery(GET_BOOK_BY_ID, {
     fetchPolicy: 'network-only',
     onCompleted(data) {
-      setBook(data.book);
+      setBook({
+        ...data.book,
+        publicationDate: new Date(data.book.publicationDate).toISOString(),
+      });
+
+      setDate(new Date(data.book.publicationDate));
     },
   });
 
@@ -72,13 +78,13 @@ const Index = ({ id }: { id: string }) => {
   const form = useForm<z.infer<typeof FormSchema>>({
     resolver: zodResolver(FormSchema),
     defaultValues: {
-      title: book?.title,
-      author: book?.author,
-      isbn: book?.isbn,
-      publicationDate: book?.publicationDate,
-      copies: book?.copies,
-      image: book?.image,
-      genre: book.genre,
+      title: '',
+      author: '',
+      isbn: '',
+      publicationDate: new Date().toISOString(),
+      copies: 0,
+      image: '',
+      genre: '',
     },
   });
 
@@ -90,9 +96,14 @@ const Index = ({ id }: { id: string }) => {
 
   useEffect(() => {
     if (book) {
-      form.reset(book);
+      form.reset({
+        ...book,
+        publicationDate: new Date(book.publicationDate)
+          .toISOString()
+          .slice(0, 10),
+      });
     }
-  }, [book, form]);
+  }, [book]);
 
   async function onSubmit(values: z.infer<typeof FormSchema>) {
     console.log(values);
@@ -105,7 +116,6 @@ const Index = ({ id }: { id: string }) => {
       create: formData,
       update: formData,
     };
-
 
     await upsertBook({
       variables: {
@@ -264,12 +274,9 @@ const Index = ({ id }: { id: string }) => {
                             type='date'
                             placeholder='Publication date'
                             {...field}
-                            value={book?.publicationDate ?? ''}
+                            value={date?.toISOString().slice(0, 10) ?? ''}
                             onChange={(e) => {
-                              setBook({
-                                ...book,
-                                publicationDate: e.target.value,
-                              });
+                              setDate(new Date(e.target.value));
                             }}
                           />
                         </div>

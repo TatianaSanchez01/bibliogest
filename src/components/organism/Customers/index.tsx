@@ -18,12 +18,18 @@ import { useRouter } from 'next/navigation';
 import { Button } from '../../ui/button';
 import { UserRoundPlus } from 'lucide-react';
 import { useState } from 'react';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { GET_CUSTOMERS } from '@/src/utils/gql/queries/customers';
+import ReactLoading from 'react-loading';
+import { useToast } from '@/src/hooks/use-toast';
+import { DELETE_CUSTOMER } from '@/src/utils/gql/mutations/customers';
 
 export default function Component() {
   const [customers, setCustomers] = useState([]);
   const router = useRouter();
+  const { toast } = useToast();
+  const [deleteCustomer, { loading: mutationLoading }] =
+    useMutation(DELETE_CUSTOMER);
 
   useQuery(GET_CUSTOMERS, {
     fetchPolicy: 'cache-and-network',
@@ -31,6 +37,46 @@ export default function Component() {
       setCustomers(data.customers);
     },
   });
+
+  async function onDelete(id: string) {
+    await deleteCustomer({
+      variables: {
+        where: {
+          id,
+        },
+      },
+    })
+      .then((data) => {
+        console.log('success');
+        const response = data.data.deleteCustomer;
+        toast({
+          variant: 'success',
+          title: `The customer  was deleted.`,
+          description: `The customer ${response.name} with document ${response.document} was deleted from the database.`,
+        });
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'This customer can not be deleted.',
+        });
+      });
+  }
+
+  if (mutationLoading)
+    return (
+      <div className='flex items-center justify-center'>
+        <ReactLoading
+          type='bubbles'
+          color='#f9802d'
+          height={'20%'}
+          width={'20%'}
+        />
+      </div>
+    );
 
   return (
     <Card>
@@ -81,7 +127,9 @@ export default function Component() {
                 </TableCell>
                 <TableCell className='hidden sm:table-cell'>
                   <Badge className='text-xs' variant='secondary'>
-                    {customer.orders[0] ? customer.orders[0].status : "No status"}
+                    {customer.orders[0]
+                      ? customer.orders[0].status
+                      : 'No status'}
                   </Badge>
                 </TableCell>
                 <TableCell className='hidden md:table-cell'>
@@ -90,10 +138,17 @@ export default function Component() {
                 <TableCell className='hidden md:table-cell justify-center'>
                   <Badge
                     onClick={() => router.push(`/customers/${customer.id}`)}
-                    className='text-xs justify-center w-24'
+                    className='text-xs justify-center w-24 cursor-pointer'
                     variant='default'
                   >
-                    View
+                    Edit
+                  </Badge>
+                  <Badge
+                    className='text-xs justify-center w-24 cursor-pointer'
+                    variant='default'
+                    onClick={() => onDelete(customer.id)}
+                  >
+                    Delete
                   </Badge>
                 </TableCell>
               </TableRow>

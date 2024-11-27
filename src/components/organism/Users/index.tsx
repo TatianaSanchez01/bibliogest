@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Badge } from '@/src/components/ui/badge';
 import {
   Card,
@@ -18,20 +18,66 @@ import {
 import { Avatar, AvatarImage } from '@/src/components/ui/avatar';
 import { Button } from '@/src/components/ui/button';
 import { GET_USERS } from '@/src/utils/gql/queries/users';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useRouter } from 'next/router';
 import { UserRoundPlus } from 'lucide-react';
+import { useToast } from '@/src/hooks/use-toast';
+import { DELETE_USER } from '@/src/utils/gql/mutations/users';
+import ReactLoading from 'react-loading';
 
 export default function Component() {
-  const [users, setUsers] = React.useState([]);
+  const [users, setUsers] = useState([]);
+  const { toast } = useToast();
   const router = useRouter();
+  const [deleteUser, { loading: mutationLoading }] = useMutation(DELETE_USER);
+
   useQuery(GET_USERS, {
     fetchPolicy: 'cache-and-network',
     onCompleted(data) {
-      console.log('users', data);
       setUsers(data.users);
     },
   });
+
+  async function onDelete(id: string) {
+    await deleteUser({
+      variables: {
+        where: {
+          id,
+        },
+      },
+    })
+      .then((data) => {
+        console.log('success');
+        const response = data.data.deleteUser;
+        toast({
+          variant: 'success',
+          title: 'The user was deleted.',
+          description: `The user ${response.name} was deleted from the database.`,
+        });
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Your book can not be deleted.',
+        });
+      });
+  }
+
+  if (mutationLoading)
+    return (
+      <div className='flex items-center justify-center'>
+        <ReactLoading
+          type='bubbles'
+          color='#f9802d'
+          height={'20%'}
+          width={'20%'}
+        />
+      </div>
+    );
+
   return (
     <Card>
       <CardHeader className='px-7 flex-row flex items-center justify-between'>
@@ -94,14 +140,15 @@ export default function Component() {
                   <div className='flex flex-row gap-5'>
                     <Badge
                       onClick={() => router.push(`/users/${user.id}`)}
-                      className='text-xs justify-center w-24'
+                      className='text-xs justify-center w-24 cursor-pointer'
                       variant='default'
                     >
                       Edit
                     </Badge>
                     <Badge
-                      className='text-xs justify-center w-24'
+                      className='text-xs justify-center w-24 cursor-pointer'
                       variant='default'
+                      onClick={() => onDelete(user.id)}
                     >
                       Delete
                     </Badge>

@@ -15,3 +15,13 @@ export const UPSERT_CUSTOMER = gql`
     }
   }
 `;
+
+export const DELETE_CUSTOMER = gql`
+  mutation DeleteCustomer($where: CustomerWhereUniqueInput!) {
+    deleteCustomer(where: $where) {
+      id
+      document
+      name
+    }
+  }
+`;

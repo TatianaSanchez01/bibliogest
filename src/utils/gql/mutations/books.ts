@@ -14,3 +14,12 @@ export const UPSERT_BOOK = gql`
     }
   }
 `;
+
+export const DELETE_BOOK = gql`
+  mutation DeleteBook($where: BookWhereUniqueInput!) {
+    deleteBook(where: $where) {
+      title
+      isbn
+    }
+  }
+`;

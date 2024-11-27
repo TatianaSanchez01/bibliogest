@@ -17,14 +17,20 @@ import {
 import { Button } from '@/src/components/ui/button';
 
 import { GET_BOOKS } from '@/src/utils/gql/queries/books';
-import { useQuery } from '@apollo/client';
+import { useMutation, useQuery } from '@apollo/client';
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Avatar, AvatarImage } from '../../ui/avatar';
 import { BookPlus } from 'lucide-react';
+import { DELETE_BOOK } from '@/src/utils/gql/mutations/books';
+import { useToast } from '@/src/hooks/use-toast';
+import ReactLoading from 'react-loading';
 
 export default function Component() {
+  const router = useRouter();
+  const { toast } = useToast();
   const [books, setBooks] = useState([]);
+  const [deleteBook, { loading: mutationLoading }] = useMutation(DELETE_BOOK);
 
   useQuery(GET_BOOKS, {
     fetchPolicy: 'cache-and-network',
@@ -33,7 +39,45 @@ export default function Component() {
     },
   });
 
-  const router = useRouter();
+  async function onDelete(id: string) {
+    await deleteBook({
+      variables: {
+        where: {
+          id,
+        },
+      },
+    })
+      .then((data) => {
+        console.log('success');
+        const response = data.data.deleteBook;
+        toast({
+          variant: 'success',
+          title: 'The book was deleted.',
+          description: `The book ${response.title} with ISBN ${response.isbn} was deleted from the database.`,
+        });
+        window.location.reload();
+      })
+      .catch((error) => {
+        console.log(error);
+        toast({
+          variant: 'destructive',
+          title: 'Uh oh! Something went wrong.',
+          description: 'Your book can not be deleted.',
+        });
+      });
+  }
+
+  if (mutationLoading)
+    return (
+      <div className='flex items-center justify-center'>
+        <ReactLoading
+          type='bubbles'
+          color='#f9802d'
+          height={'20%'}
+          width={'20%'}
+        />
+      </div>
+    );
 
   return (
     <Card>
@@ -98,14 +142,15 @@ export default function Component() {
                   <div className='flex flex-row gap-5'>
                     <Badge
                       onClick={() => router.push(`/products/${book.id}`)}
-                      className='text-xs justify-center w-24'
+                      className='text-xs justify-center w-24 cursor-pointer'
                       variant='default'
                     >
                       Edit
                     </Badge>
                     <Badge
-                      className='text-xs justify-center w-24'
+                      className='text-xs justify-center w-24 cursor-pointer'
                       variant='default'
+                      onClick={() => onDelete(book.id)}
                     >
                       Delete
                     </Badge>

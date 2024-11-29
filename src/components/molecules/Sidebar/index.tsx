@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import Link from 'next/link';
 import { useSession } from 'next-auth/react';
 
@@ -25,11 +25,23 @@ import {
   CardTitle,
 } from '@/src/components/ui/card';
 import { useRouter } from 'next/router';
+import { useQuery } from '@apollo/client';
+import { GET_ORDERS } from '@/src/utils/gql/queries/orders';
 
 const Index = () => {
   const { data: session } = useSession();
 
   const location = useRouter();
+  const [requests, setRequests] = useState(0);
+
+  useQuery(GET_ORDERS, {
+    fetchPolicy: 'cache-and-network',
+    onCompleted(data) {
+      setRequests(
+        data.orders.filter((order: any) => order.status === 'Requested').length
+      );
+    },
+  });
 
   return (
     <div className='hidden border-r bg-muted/40 md:block'>
@@ -68,7 +80,7 @@ const Index = () => {
               <LibraryBig className='h-4 w-4' />
               Requests
               <Badge className='ml-auto flex h-6 w-6 shrink-0 items-center justify-center rounded-full'>
-                6
+                {requests}
               </Badge>
             </Link>
             <Link

@@ -8,7 +8,7 @@ const useFormData = (initial: any) => {
   const getFormData: any = () => {
     const fd = new FormData(form.current);
 
-    const obj = {};
+    const obj: any = {};
     fd.forEach((value, key) => {
       const str = key.split(':');
 

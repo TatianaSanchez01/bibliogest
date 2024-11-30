@@ -128,7 +128,7 @@ const Index = ({ id }: { id: string }) => {
       .then(() => {
         console.log('success');
         toast({
-          variant: 'success',
+          variant: 'default',
           title: 'Uh oh! Something went wrong.',
           description: 'There was a problem with your request.',
         });

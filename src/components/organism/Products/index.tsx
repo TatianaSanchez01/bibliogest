@@ -51,7 +51,7 @@ export default function Component() {
         console.log('success');
         const response = data.data.deleteBook;
         toast({
-          variant: 'success',
+          variant: 'default',
           title: 'The book was deleted.',
           description: `The book ${response.title} with ISBN ${response.isbn} was deleted from the database.`,
         });

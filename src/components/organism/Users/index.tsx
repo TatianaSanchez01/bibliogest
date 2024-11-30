@@ -50,7 +50,7 @@ export default function Component() {
         console.log('success');
         const response = data.data.deleteUser;
         toast({
-          variant: 'success',
+          variant: 'default',
           title: 'The user was deleted.',
           description: `The user ${response.name} was deleted from the database.`,
         });

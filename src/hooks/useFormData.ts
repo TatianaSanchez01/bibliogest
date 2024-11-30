@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react';
 
-const useFormData = initial => {
+const useFormData = (initial: any) => {
   const form = useRef(initial);
 
   const [formData, setFormData] = useState({} as any);
